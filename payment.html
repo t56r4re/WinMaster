@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Secure checkout · WinMaster suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        /* ---------- professional checkout design ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f6f9fc;
+            color: #1e2f3f;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; width: 100%; }
+
+        /* header – refined, minimal */
+        .site-header {
+            background: white;
+            padding: 20px 0;
+            border-bottom: 1px solid #e3edf5;
+        }
+        .site-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 1.9rem;
+            color: #0e2a3b;
+            letter-spacing: -0.02em;
+        }
+        .logo .dot { color: #1C6E4F; font-size: 2.2rem; margin-left: 2px; }
+        .checkout-badge {
+            background: #EAF4ED;
+            color: #1C6E4F;
+            font-weight: 600;
+            padding: 6px 20px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            border: 1px solid #b7dac9;
+        }
+
+        /* main payment layout */
+        .payment-page {
+            flex: 1;
+            padding: 48px 0 60px;
+        }
+        .payment-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* left side – payment info card (professional) */
+        .payment-info h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #0e2f42;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+        .info-card {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 15px 35px -10px rgba(0,40,30,0.1);
+            border: 1px solid #d9e9f2;
+            margin-bottom: 24px;
+        }
+        .info-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0b3b2b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .instruction-highlight {
+            background: #F0F8F2;
+            padding: 16px 20px;
+            border-radius: 18px;
+            border-left: 5px solid #1C6E4F;
+            font-weight: 500;
+            margin-bottom: 24px;
+            color: #1b4635;
+            font-size: 1rem;
+        }
+        .payment-details {
+            background: #f4fafd;
+            border-radius: 20px;
+            padding: 22px;
+            margin: 24px 0;
+            border: 1px solid #cde0ed;
+        }
+        .payment-details div {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #b8d3e5;
+            font-size: 1rem;
+        }
+        .payment-details div:last-child { border-bottom: none; }
+        .payment-details span { font-weight: 600; color: #144d39; }
+
+        .warning-note {
+            background: #fff5e6;
+            border-radius: 16px;
+            padding: 16px 20px;
+            font-size: 0.95rem;
+            border: 1px solid #fadcb4;
+            color: #6e4015;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .secure-note {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #285b7c;
+            font-weight: 500;
+            padding: 8px 0 0 6px;
+        }
+        .secure-note::before {
+            content: "🔒";
+            font-size: 1.2rem;
+        }
+
+        /* right side – order form */
+        .payment-form-card {
+            background: white;
+            border-radius: 40px;
+            padding: 40px 36px;
+            box-shadow: 0 25px 45px -18px #0f3440;
+            border: 1px solid #deedf5;
+        }
+        .payment-form-card h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #0b2f41;
+            margin-bottom: 28px;
+            letter-spacing: -0.02em;
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e4d62;
+            display: block;
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e2eef9;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            background: #fbfeff;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1C6E4F;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(28,110,79,0.1);
+        }
+        textarea { resize: vertical; min-height: 80px; }
+
+        .order-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #EAF2F9;
+            padding: 18px 22px;
+            border-radius: 30px;
+            margin: 28px 0 20px;
+            font-weight: 600;
+            border: 1px solid #c2ddec;
+        }
+        .price {
+            font-size: 1.6rem;
+            color: #1C6E4F;
+        }
+
+        .btn-primary {
+            background: #1C6E4F;
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 12px 24px -10px #1C6E4F;
+            border: 1px solid #318f67;
+            letter-spacing: 0.3px;
+        }
+        .btn-primary:hover {
+            background: #0f5c3f;
+            transform: scale(1.01);
+            box-shadow: 0 16px 28px -8px #1e553d;
+        }
+
+        .terms-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #597f99;
+        }
+        .form-feedback {
+            margin-top: 20px;
+            font-weight: 500;
+            text-align: center;
+            min-height: 30px;
+        }
+
+        /* footer */
+        .site-footer {
+            background: #112734;
+            color: #b0cbd9;
+            padding: 24px 0;
+            margin-top: auto;
+        }
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-row a {
+            color: #c7ddec;
+            text-decoration: none;
+            border-bottom: 1px dashed;
+        }
+
+        /* responsive */
+        @media (max-width: 800px) {
+            .payment-container { grid-template-columns: 1fr; }
+            .payment-form-card { padding: 32px 24px; }
+        }
+        @media (max-width: 480px) {
+            .payment-details div { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <span class="logo">Win<span style="font-weight:400;">Master</span><span class="dot">⦁</span></span>
+            <span class="checkout-badge">checkout</span>
+        </div>
+    </header>
+
+    <main class="payment-page">
+        <div class="container payment-container">
+            <!-- LEFT: payment instructions – professional, trustworthy -->
+            <div class="payment-info">
+                <h2>Complete your order</h2>
+                <div class="info-card">
+                    <h3>Mobile Banking (bKash / Nagad / Rocket)</h3>
+                    <div class="instruction-highlight">
+                     <strong></strong>নিচের অ্যাকাউন্টে 199 টাকা পাঠান। তারপর আপনার লেনদেন আইডি দিয়ে ফর্মটি পূরণ করুন। </div>
+
+                   <div class="payment-details">
+
+    <!-- bKash -->
+    <div>
+        <span style="display: flex; align-items: center; gap: 8px;">
+            <img src="assets/icons/bkash.jpg" alt="bKash" style="height: 22px; width: auto; border-radius: 4px;"> 
+            bKash (personal)
+        </span>
+        <span class="copy-value" data-copy="01853978790">
+            01853978790 
+            <button class="copy-btn" onclick="copyToClipboard('01853978790', this)">📋</button>
+        </span>
+    </div>
+
+    <!-- Nagad -->
+    <div>
+        <span style="display: flex; align-items: center; gap: 8px;">
+            <img src="assets/icons/nagad.png" alt="Nagad" style="height: 22px; width: auto; border-radius: 4px;"> 
+            Nagad
+        </span>
+        <span class="copy-value" data-copy="01853978790">
+            01853978790 
+            <button class="copy-btn" onclick="copyToClipboard('01853978790', this)">📋</button>
+        </span>
+    </div>
+
+    <!-- Rocket -->
+    <div>
+        <span style="display: flex; align-items: center; gap: 8px;">
+            <img src="assets/icons/Rocket.png" alt="Rocket" style="height: 22px; width: auto; border-radius: 4px;"> 
+            Rocket
+        </span>
+        <span class="copy-value" data-copy="01853978790">
+            01853978790 
+            <button class="copy-btn" onclick="copyToClipboard('01853978790', this)">📋</button>
+        </span>
+    </div>
+
+</div>
+
+<!-- Include the copy script (if not already present) -->
+<script>
+function copyToClipboard(text, btnElement) {
+    // Create a temporary input to copy from
+    const tempInput = document.createElement('input');
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    
+    // Visual feedback on button
+    const originalText = btnElement.innerText;
+    btnElement.innerText = '✅';
+    setTimeout(() => {
+        btnElement.innerText = originalText;
+    }, 1500);
+}
+</script>
+
+<!-- Required styles – add to your existing CSS or keep as inline -->
+<style>
+    .payment-details {
+        background: #f4fafd;
+        border-radius: 20px;
+        padding: 22px;
+        margin: 24px 0;
+        border: 1px solid #cde0ed;
+    }
+    .payment-details div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed #b8d3e5;
+        font-size: 1rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .payment-details div:last-child { border-bottom: none; }
+    .payment-details > div > span:first-child {
+        font-weight: 600;
+        color: #144d39;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .copy-value {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        color: #1a3e4b;
+    }
+    .copy-btn {
+        background: white;
+        border: 1px solid #1C6E4F;
+        border-radius: 30px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        color: #1C6E4F;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+    .copy-btn:hover {
+        background: #1C6E4F;
+        color: white;
+        border-color: #1C6E4F;
+    }
+    /* responsive adjustment */
+    @media (max-width: 500px) {
+        .payment-details div {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .copy-value { align-self: flex-end; }
+    }
+</style>
+
+<script>
+function copyToClipboard(text, btnElement) {
+    // Create a temporary input to copy from
+    const tempInput = document.createElement('input');
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    
+    // Optional: Visual feedback on button
+    const originalText = btnElement.innerText;
+    btnElement.innerText = '✅';
+    setTimeout(() => {
+        btnElement.innerText = originalText;
+    }, 1500);
+}
+</script>
+
+<style>
+.payment-details {
+    background: #f4fafd;
+    border-radius: 20px;
+    padding: 22px;
+    margin: 24px 0;
+    border: 1px solid #cde0ed;
+}
+.payment-details div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #b8d3e5;
+    font-size: 1rem;
+}
+.payment-details div:last-child { border-bottom: none; }
+.payment-details span { font-weight: 600; color: #144d39; }
+.copy-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.copy-btn {
+    background: none;
+    border: 1px solid #1C6E4F;
+    border-radius: 30px;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background: white;
+    color: #1C6E4F;
+    transition: 0.2s;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.copy-btn:hover {
+    background: #1C6E4F;
+    color: white;
+    border-color: #1C6E4F;
+}
+</style>
+                    <div class="warning-note">
+                        ⚠️ After sending, enter the exact TRX ID below. You'll receive the download link via email within 5 minutes.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: order form – clean, professional -->
+            <div class="payment-form-card">
+                <h3>Order details</h3>
+                <form id="order-form" action="#" method="post">
+                    <div class="form-group">
+                        <label for="fullname">Full name *</label>
+                        <input type="text" id="fullname" name="fullname" placeholder="Md. Rahim Uddin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address *</label>
+                        <input type="email" id="email" name="email" placeholder="rahim@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="method">Payment method *</label>
+                        <select id="method" name="method" required>
+                            <option value="" disabled selected>– select one –</option>
+                            <option value="bkash">bKash</option>
+                            <option value="nagad">Nagad</option>
+                            <option value="rocket">Rocket</option>
+                            <option value="bank">Bank transfer (manual)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="trxid">Transaction ID (TRX ID) *</label>
+                        <input type="text" id="trxid" name="trxid" placeholder="e.g. BK9A8B7C6D" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Additional note (optional)</label>
+                        <textarea id="note" name="note" rows="2" placeholder="any special request?"></textarea>
+                    </div>
+
+                    <div class="order-summary">
+                        <span>WinMaster Collection · lifetime</span>
+                        <span class="price">199</span>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submit-order">
+                        <span>✓ submit & verify payment</span>
+                    </button>
+                    <p class="terms-note">By submitting you agree to our refund policy and terms of service.</p>
+                </form>
+                <div id="form-feedback" class="form-feedback"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Footer Styles */
+        .site-footer {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .copyright {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .footer-email {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .footer-email:hover {
+            color: #25D366;
+            text-decoration: none;
+        }
+        /* WhatsApp Icon Styles */
+        .footer-email i {
+            font-size: 22px;
+            color: #25D366;
+            margin-right: 8px;
+            transition: transform 0.2s ease;
+        }
+        .footer-email:hover i {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .footer-row {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-email {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-row">
+            <span class="copyright">© 2026 WinMaster · a professional software bundle</span>
+            <a href="https://wa.me/+8801853978790" class="footer-email" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+                support
+            </a>
+        </div>
+    </div>
+</footer>
+
+    <!-- simple form feedback (professional) -->
+    <script>
+        (function() {
+            const form = document.getElementById('order-form');
+            const feedbackDiv = document.getElementById('form-feedback');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const name = document.getElementById('fullname')?.value.trim();
+                    const email = document.getElementById('email')?.value.trim();
+                    const method = document.getElementById('method')?.value;
+                    const trx = document.getElementById('trxid')?.value.trim();
+
+                    if (!name || !email || !method || !trx) {
+                        feedbackDiv.style.color = '#b34a3a';
+                        feedbackDiv.innerText = '❗ All fields marked * must be filled.';
+                        return;
+                    }
+                    if (!email.includes('@') || !email.includes('.')) {
+                        feedbackDiv.style.color = '#b34a3a';
+                        feedbackDiv.innerText = '❗ Please enter a valid email address.';
+                        return;
+                    }
+                    // simulate success
+                    feedbackDiv.style.color = '#1C6E4F';
+                    feedbackDiv.innerText = '✓ Order received! Check your email (within 5 min) for download link.';
+                    form.reset(); // optional demo
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
