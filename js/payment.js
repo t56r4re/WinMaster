@@ -2,17 +2,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('order-form');
     const feedbackDiv = document.getElementById('form-feedback');
+    
+    // Replace with your Google Apps Script Web App URL
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxB6wUZ_wO8SMNzC5jLZmT1zvLSyYtgoFk-McJbdUtBcQ837J4CYu9aw44xNI4MgIiA/exec';
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault();          // prevent actual POST (no backend)
+        e.preventDefault();
         
-        // simulate form validation and backend call
+        // Get form values
         const name = document.getElementById('fullname').value.trim();
         const email = document.getElementById('email').value.trim();
         const method = document.getElementById('method').value;
-        const trx = document.getElementById('trxid').value.trim();
+        const trxid = document.getElementById('trxid').value.trim();
 
-        if (!name || !email || !method || !trx) {
+        // Validate form
+        if (!name || !email || !method || !trxid) {
             showFeedback('Please fill all required fields.', 'error');
             return;
         }
@@ -21,43 +25,86 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Disable button to avoid double-click
+        // Disable button
         const submitBtn = document.getElementById('submit-order');
         submitBtn.disabled = true;
-        submitBtn.innerText = 'processing...';
+        submitBtn.innerText = 'Verifying payment...';
 
-        // simulate network delay (payment verification)
         try {
-            await new Promise(resolve => setTimeout(resolve, 1800));
-
-            // ** Simulate successful backend verification **
-            // In real implementation, here you would send data to server via fetch
-            // and upon success, server would send email with access link.
-
-            // For demo – we show success and redirect (concept)
-            showFeedback('✅ Payment recorded! Check your email (demo – access link would be sent).', 'success');
+            // Verify TRXID with Google Sheets
+            const verificationResult = await verifyTRXID(trxid, name, email, method);
             
-            // Reset after a few seconds (in real scenario you redirect)
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'submit order & verify';
-            form.reset();
-
-            // (optional) simulate email sending message
-            setTimeout(() => {
-                alert('📧 Demo: an email containing the secure access link would be sent to ' + email);
-            }, 500);
-
+            if (verificationResult.success) {
+                // Payment verified successfully
+                showFeedback('✅ ' + verificationResult.message, 'success');
+                
+                // In real implementation, you would:
+                // 1. Send email with access link
+                // 2. Redirect to success page
+                // 3. Update user session
+                
+                // Simulate email sending
+                setTimeout(() => {
+                    alert(`📧 Email would be sent to ${email} with access link`);
+                    // Redirect to success page (uncomment in production)
+                    // window.location.href = '/payment-success.html';
+                }, 1000);
+                
+                // Reset form
+                form.reset();
+            } else {
+                // Payment verification failed
+                showFeedback('❌ ' + verificationResult.message, 'error');
+            }
+            
         } catch (error) {
-            showFeedback('Something went wrong. Please try again.', 'error');
+            console.error('Verification error:', error);
+            showFeedback('Connection error. Please try again.', 'error');
+        } finally {
+            // Re-enable button
             submitBtn.disabled = false;
-            submitBtn.innerText = 'submit order & verify';
+            submitBtn.innerText = 'Submit Order & Verify';
         }
     });
 
+    // Function to verify TRXID with Google Sheets
+    async function verifyTRXID(trxid, name, email, method) {
+        try {
+            // Method 1: Using fetch with JSONP approach (works better with Apps Script)
+            const url = `${SCRIPT_URL}?action=verify&trxid=${encodeURIComponent(trxid)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&method=${encodeURIComponent(method)}`;
+            
+            const response = await fetch(url);
+            const text = await response.text();
+            
+            // Try to parse JSON response
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                // If not JSON, return formatted response
+                return {
+                    success: text.includes('success') || text.includes('verified'),
+                    message: text
+                };
+            }
+            
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
+        }
+    }
+
     function showFeedback(message, type) {
         feedbackDiv.textContent = message;
+        feedbackDiv.style.display = 'block';
         feedbackDiv.style.background = type === 'error' ? '#fee9e7' : '#e2f7e9';
         feedbackDiv.style.color = type === 'error' ? '#b3402d' : '#1f7840';
         feedbackDiv.style.border = type === 'error' ? '1px solid #f3cdc5' : '1px solid #b3e6c9';
+        
+        // Auto hide after 5 seconds for success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                feedbackDiv.style.display = 'none';
+            }, 5000);
+        }
     }
 });
