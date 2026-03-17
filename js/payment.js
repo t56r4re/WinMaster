@@ -3,11 +3,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('order-form');
     const feedbackDiv = document.getElementById('form-feedback');
     
-    // Replace with your Google Apps Script Web App URL
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxB6wUZ_wO8SMNzC5jLZmT1zvLSyYtgoFk-McJbdUtBcQ837J4CYu9aw44xNI4MgIiA/exec';
+    // Your Google Apps Script URL - KEEP YOUR EXISTING URL
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUZZpPVwpbK8rJYZrwUb0izpMTiDkqXlDWRWp9t0-1MTGNWHtqyvHZ_-bESCcOETKN/exec';
+    
+    // EmailJS Configuration
+    const EMAILJS_PUBLIC_KEY = "Z5NCTvs9INi1p7TMd";
+    const EMAILJS_SERVICE_ID = "service_4jkpsfx";
+    const EMAILJS_TEMPLATE_ID = "template_8169k0m";
+
+    // Rate limiting
+    let submissionCount = 0;
+    const MAX_SUBMISSIONS = 3;
+    const RATE_LIMIT_WINDOW = 60000; // 1 minute
+    let lastSubmissionTime = 0;
+
+    // Initialize EmailJS when available
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        // Rate limiting check
+        if (!checkRateLimit()) {
+            showFeedback('Too many attempts. Please wait a minute.', 'error');
+            return;
+        }
         
         // Get form values
         const name = document.getElementById('fullname').value.trim();
@@ -15,22 +37,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const method = document.getElementById('method').value;
         const trxid = document.getElementById('trxid').value.trim();
 
-        // Validate form
+        // Validate inputs
         if (!name || !email || !method || !trxid) {
             showFeedback('Please fill all required fields.', 'error');
             return;
         }
-        if (!email.includes('@') || !email.includes('.')) {
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
             showFeedback('Enter a valid email address.', 'error');
             return;
         }
+        
+        // TrxID format validation
+        if (trxid.length < 5) {
+            showFeedback('Transaction ID seems too short.', 'error');
+            return;
+        }
 
-        // Disable button
+        // Disable button and show loading
         const submitBtn = document.getElementById('submit-order');
+        const originalText = submitBtn.innerText;
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Verifying payment...';
+        submitBtn.innerText = '⏳ Verifying payment...';
 
         try {
+            // Show sending feedback
+            showFeedback('Verifying your transaction...', 'info');
+            
             // Verify TRXID with Google Sheets
             const verificationResult = await verifyTRXID(trxid, name, email, method);
             
@@ -38,22 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Payment verified successfully
                 showFeedback('✅ ' + verificationResult.message, 'success');
                 
-                // In real implementation, you would:
-                // 1. Send email with access link
-                // 2. Redirect to success page
-                // 3. Update user session
-                
-                // Simulate email sending
+                // 🚀 NEW: Send access link email automatically
                 setTimeout(() => {
-                    alert(`📧 Email would be sent to ${email} with access link`);
-                    // Redirect to success page (uncomment in production)
-                    // window.location.href = '/payment-success.html';
-                }, 1000);
+                    sendAccessEmail(name, email, trxid);
+                }, 1000); // 1 second delay
                 
-                // Reset form
-                form.reset();
+                // Clear form after success
+                setTimeout(() => {
+                    form.reset();
+                }, 5000);
+                
             } else {
-                // Payment verification failed
                 showFeedback('❌ ' + verificationResult.message, 'error');
             }
             
@@ -63,15 +93,71 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             // Re-enable button
             submitBtn.disabled = false;
-            submitBtn.innerText = 'Submit Order & Verify';
+            submitBtn.innerText = originalText;
         }
     });
 
-    // Function to verify TRXID with Google Sheets
+    // ✅ NEW: EmailJS send function (আপনার style এ)
+    function sendAccessEmail(name, email, trxid) {
+        if (typeof emailjs === 'undefined') {
+            console.log('EmailJS not loaded');
+            return;
+        }
+
+        // Generate unique access link
+        const accessToken = btoa(trxid + Date.now()).slice(0, 20);
+        const accessLink = `https://yourwebsite.com/access?token=${accessToken}&trx=${trxid}`;
+        
+        showFeedback('📧 Sending access link to your email...', 'info');
+
+        const templateParams = {
+            user_name: name,
+            user_email: email,
+            access_link: accessLink,
+            trxid: trxid
+        };
+
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+            .then((response) => {
+                console.log('✅ Email sent:', response);
+                showFeedback(`✅ Access link sent to ${email}! Check Gmail inbox/spam.`, 'success');
+            }, (error) => {
+                console.error('❌ Email error:', error);
+                showFeedback('✅ Verified! Email issue - contact support.', 'error');
+            });
+    }
+
+    function checkRateLimit() {
+        const now = Date.now();
+        
+        if (now - lastSubmissionTime > RATE_LIMIT_WINDOW) {
+            // Reset counter after window passes
+            submissionCount = 0;
+            lastSubmissionTime = now;
+            return true;
+        }
+        
+        if (submissionCount >= MAX_SUBMISSIONS) {
+            return false;
+        }
+        
+        submissionCount++;
+        lastSubmissionTime = now;
+        return true;
+    }
+
     async function verifyTRXID(trxid, name, email, method) {
         try {
-            // Method 1: Using fetch with JSONP approach (works better with Apps Script)
-            const url = `${SCRIPT_URL}?action=verify&trxid=${encodeURIComponent(trxid)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&method=${encodeURIComponent(method)}`;
+            // Build URL with parameters
+            const params = new URLSearchParams({
+                action: 'verify',
+                trxid: trxid,
+                name: name,
+                email: email,
+                method: method
+            });
+            
+            const url = `${SCRIPT_URL}?${params.toString()}`;
             
             const response = await fetch(url);
             const text = await response.text();
@@ -80,9 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 return JSON.parse(text);
             } catch (e) {
-                // If not JSON, return formatted response
+                // Fallback for text responses
                 return {
-                    success: text.includes('success') || text.includes('verified'),
+                    success: text.toLowerCase().includes('success') || text.includes('Found'),
                     message: text
                 };
             }
@@ -96,15 +182,39 @@ document.addEventListener('DOMContentLoaded', () => {
     function showFeedback(message, type) {
         feedbackDiv.textContent = message;
         feedbackDiv.style.display = 'block';
-        feedbackDiv.style.background = type === 'error' ? '#fee9e7' : '#e2f7e9';
-        feedbackDiv.style.color = type === 'error' ? '#b3402d' : '#1f7840';
-        feedbackDiv.style.border = type === 'error' ? '1px solid #f3cdc5' : '1px solid #b3e6c9';
+        feedbackDiv.style.padding = '12px 16px';
+        feedbackDiv.style.borderRadius = '12px';
+        feedbackDiv.style.marginTop = '16px';
         
-        // Auto hide after 5 seconds for success messages
+        if (type === 'error') {
+            feedbackDiv.style.background = '#fee9e7';
+            feedbackDiv.style.color = '#b3402d';
+            feedbackDiv.style.border = '1px solid #f3cdc5';
+        } else if (type === 'success') {
+            feedbackDiv.style.background = '#e2f7e9';
+            feedbackDiv.style.color = '#1f7840';
+            feedbackDiv.style.border = '1px solid #b3e6c9';
+        } else {
+            feedbackDiv.style.background = '#e6f3fa';
+            feedbackDiv.style.color = '#1e4d62';
+            feedbackDiv.style.border = '1px solid #b8d3e5';
+        }
+        
+        // Auto hide after 8 seconds for success messages
         if (type === 'success') {
             setTimeout(() => {
                 feedbackDiv.style.display = 'none';
-            }, 5000);
+            }, 8000);
         }
     }
+    
+    // Add TrxID format helper (optional)
+    const trxidInput = document.getElementById('trxid');
+    if (trxidInput) {
+        trxidInput.addEventListener('input', function(e) {
+            // Convert to uppercase for better UX
+            this.value = this.value.toUpperCase();
+        });
+    }
 });
+
