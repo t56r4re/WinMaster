@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackDiv = document.getElementById('form-feedback');
 
     // Google Apps Script URL
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUZZpPVwpbK8rJYZrwUb0izpMTiDkqXlDWRWp9t0-1MTGNWHtqyvHZ_-bESCcOETKN/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxB6wUZ_wO8SMNzC5jLZmT1zvLSyYtgoFk-McJbdUtBcQ837J4CYu9aw44xNI4MgIiA/exec';
 
     // Telegram config
     const TG_BOT_TOKEN = "7888336988:AAFzsewYXVT0Grxx7fQwKydxcKNMlUkLXqk";
