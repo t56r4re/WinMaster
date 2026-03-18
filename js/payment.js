@@ -1,14 +1,10 @@
-// payment.js - Complete Fixed English Version
+// payment.js - Updated: Telegram moved to Apps Script
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('order-form');
     const feedbackDiv = document.getElementById('form-feedback');
 
     // Google Apps Script URL
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxB6wUZ_wO8SMNzC5jLZmT1zvLSyYtgoFk-McJbdUtBcQ837J4CYu9aw44xNI4MgIiA/exec';
-
-    // Telegram config
-    const TG_BOT_TOKEN = "7888336988:AAFzsewYXVT0Grxx7fQwKydxcKNMlUkLXqk";
-    const TG_CHAT_ID = "5634946920";
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXJbnt-0TBUT_OnZIaRPima92GEt11wcRDrK-ZM7zWX1Il_6rKYFFGlSAomC7q9g1Y/exec';
 
     // Rate limiting
     let submissionCount = 0;
@@ -56,12 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.innerText = '⏳ Verifying payment...';
 
         try {
-            // Send to Telegram (background)
-            sendUserToTelegram(name, email, method, trxid).catch(console.error);
-
             showFeedback('Verifying your payment...', 'info');
 
-            // Verify with Google Sheets
+            // Verify with Google Sheets (Telegram notification handled in Apps Script)
             const verificationResult = await verifyTRXID(trxid, name, email, method);
 
             if (verificationResult.success) {
@@ -101,10 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // PDF Generation Function (Fixed)
+    // PDF Generation Function (Unchanged)
     async function generatePDFReceipt(name, trxid) {
         try {
-            // Check if jspdf is loaded
             if (typeof window.jspdf === 'undefined') {
                 await loadJSPDFLibrary();
             }
@@ -112,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Title
             doc.setFont("helvetica", "bold");
             doc.setFontSize(24);
             doc.setTextColor(0, 102, 204);
@@ -122,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setTextColor(0, 153, 76);
             doc.text("✓ Transaction Completed", 20, 35);
 
-            // Customer Info
             doc.setFontSize(14);
             doc.setTextColor(0, 0, 0);
             doc.setFont("helvetica", "normal");
@@ -131,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(12);
             doc.text("Your payment has been successfully processed.", 20, 60);
 
-            // Transaction Details
             doc.setFont("helvetica", "bold");
             doc.text("Transaction Details:", 20, 80);
             
@@ -140,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.text("Product: WinMaster Suite (Lifetime Access)", 30, 100);
             doc.text("Payment Date: " + new Date().toLocaleString(), 30, 110);
             
-            // Download Link
             doc.setFont("helvetica", "bold");
             doc.text("Download Link:", 20, 130);
             
@@ -149,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const link = "https://drive.google.com/drive/folders/1iYlA1Gwqg-AuNUzmBDhil6AOmdP15N6Z";
             doc.text(link, 20, 140, { maxWidth: 170 });
             
-            // Warning
             doc.setTextColor(255, 0, 0);
             doc.setFont("helvetica", "bold");
             doc.text("⚠️ IMPORTANT:", 20, 160);
@@ -158,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.text("Do not share this information with anyone.", 30, 170);
             doc.text("This is your personal access receipt.", 30, 180);
             
-            // Support
             doc.setTextColor(0, 0, 0);
             doc.setFont("helvetica", "bold");
             doc.text("Support:", 20, 200);
@@ -167,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.text("WhatsApp: +8801853978790", 30, 210);
             doc.text("Email: support@winmaster.com", 30, 220);
             
-            // Footer
             doc.setFontSize(9);
             doc.setFont("helvetica", "italic");
             doc.setTextColor(128, 128, 128);
@@ -181,12 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             doc.text(`Generated: ${dateStr} (Bangladesh Time)`, 20, 250);
             
-            // Border (Fixed dimensions)
             doc.setDrawColor(0, 102, 204);
             doc.setLineWidth(0.5);
-            doc.rect(10, 10, 190, 270);  // Increased height to fit footer
+            doc.rect(10, 10, 190, 270);
 
-            // Save PDF
             const filename = `WinMaster_Receipt_${trxid || 'confirmed'}.pdf`;
             doc.save(filename);
             
@@ -199,16 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Show download link as fallback
+    // Show download link as fallback (Unchanged)
     function showDownloadLink() {
         const link = "https://drive.google.com/drive/folders/1iYlA1Gwqg-AuNUzmBDhil6AOmdP15N6Z";
         showFeedback(`📥 Download Link: ${link}`, 'success');
-        
-        // Also open in new tab
         window.open(link, '_blank');
     }
 
-    // Load jspdf library if not present (Fixed)
+    // Load jspdf library (Unchanged)
     async function loadJSPDFLibrary() {
         return new Promise((resolve, reject) => {
             if (typeof window.jspdf !== 'undefined') {
@@ -230,40 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Telegram notification (Fixed)
-    async function sendUserToTelegram(name, email, method, trxid) {
-        const msg = `🔔 NEW ORDER - WinMaster Suite
-━━━━━━━━━━━━━━━━━━
-👤 Name: ${name}
-✉️ Email: ${email}
-📱 Payment Method: ${method}
-💳 TRX ID: ${trxid}
-━━━━━━━━━━━━━━━━━━
-⏰ Time: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })}`;
-
-        try {
-            const url = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: TG_CHAT_ID,
-                    text: msg,
-                    parse_mode: 'HTML'
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Telegram API error: ${response.status}`);
-            }
-            
-            console.log("✅ Telegram notification sent");
-        } catch (error) {
-            console.error("Telegram error:", error);
-        }
-    }
-
-    // Google Sheets verification (Fixed with actual API call)
+    // Google Sheets verification (Updated - Telegram handled in Apps Script)
     async function verifyTRXID(trxid, name, email, method) {
         try {
             const params = new URLSearchParams({
@@ -275,18 +223,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const url = `${SCRIPT_URL}?${params.toString()}`;
 
-            // Actual API call
             const response = await fetch(url);
             const data = await response.json();
 
             return {
-                success: data.success !== false,  // Default to true if no response
+                success: data.success !== false,
                 message: data.message || 'Payment verified successfully!'
             };
 
         } catch (error) {
             console.error('Verification error:', error);
-            // Return success anyway to ensure user gets access
             return {
                 success: true,
                 message: 'Payment received! (Offline mode)'
@@ -294,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Rate limiting function (Fixed)
+    // Rate limiting function (Unchanged)
     function checkRateLimit() {
         const now = Date.now();
         if (now - lastSubmissionTime > RATE_LIMIT_WINDOW) {
@@ -310,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // Feedback function (Fixed)
+    // Feedback function (Unchanged)
     function showFeedback(message, type) {
         if (!feedbackDiv) return;
         
@@ -343,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // TRXID to uppercase
+    // TRXID to uppercase (Unchanged)
     const trxidInput = document.getElementById('trxid');
     if (trxidInput) {
         trxidInput.addEventListener('input', function(e) {
@@ -351,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Preload jspdf
+    // Preload jspdf (Unchanged)
     if (typeof window.jspdf === 'undefined') {
         loadJSPDFLibrary().catch(() => {
             console.warn('jspdf preload failed');
