@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             doc.setFontSize(16);
             doc.setTextColor(0, 153, 76);
-            doc.text("✓ Transaction Completed", 20, 35);
+            doc.text("Transaction Completed", 20, 35);
 
             doc.setFontSize(14);
             doc.setTextColor(0, 0, 0);
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             doc.setFont("helvetica", "normal");
             doc.text("Transaction ID: " + (trxid || 'N/A'), 30, 90);
-            doc.text("Product: WinMaster Suite (Lifetime Access)", 30, 100);
+            doc.text("Product: WinMaster (Lifetime Access)", 30, 100);
             doc.text("Payment Date: " + new Date().toLocaleString(), 30, 110);
             
             doc.setFont("helvetica", "bold");
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             doc.setTextColor(255, 0, 0);
             doc.setFont("helvetica", "bold");
-            doc.text("⚠️ IMPORTANT:", 20, 160);
+            doc.text("IMPORTANT:", 20, 160);
             
             doc.setFont("helvetica", "normal");
             doc.text("Do not share this information with anyone.", 30, 170);
