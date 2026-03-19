@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             doc.setFont("helvetica", "normal");
             doc.text("WhatsApp: +8801853978790", 30, 210);
-            doc.text("Email: support@winmaster.com", 30, 220);
+            doc.text("Email: support.winmaster@gmail.com", 30, 220);
             
             doc.setFontSize(9);
             doc.setFont("helvetica", "italic");
